@@ -22,12 +22,6 @@ function fetchMyRepos() {
         })
         data += ` </table>`
 
-        // console.log("masuk sini ====", response)
-        // let hasil = ''
-        // response.forEach(data => {
-        //     console.log(data.name)
-        //     hasil += `<li>${data.name}</li>`
-        // });
         $('#listing').append(data)
     })
 }
@@ -61,6 +55,13 @@ function fetchStarred() {
 }
 
 
+// function fetchLanding() {
+//     $('#title-landing').hide()
+//     $('#alert-div').html('')
+//     $('#create-form').hide()
+//     $('#logged-in-navbar').hide()
+// }
+
 function fetchHomepage() {
     $('#alert-div').html('')
 
@@ -77,7 +78,7 @@ function fetchHomepage() {
             <center>
             <div class="col-md-4">
             <div class="card">
-            <img class="card-img-top" src="`+ result.avatar_url +`" alt="Card image cap">
+            <img class="card-img-top" src="`+ result.avatar_url +`" alt="image">
             <div class="card-body">
                 <h5 class="card-title">`+ result.name +`</h5>
                 <h6 class="card-subtitle mb-2 text-muted">`+ result.bio +`</h6>
@@ -201,12 +202,64 @@ function searchFriendRepo() {
 
 }
 
-$('#submit-new-repo').on('click', function() {
-    createRepo()
-})
+function onSignIn(googleUser) {
+    var profile = googleUser.getBasicProfile();
+    console.log('ID: ' + profile.getId()); 
+    console.log('Name: ' + profile.getName());
+    console.log('Image URL: ' + profile.getImageUrl());
+    console.log('Email: ' + profile.getEmail()); 
+
+    var id_token = googleUser.getAuthResponse().id_token;
+    console.log(id_token, 'idddd')
+
+    // $.post(`http://localhost:4000/auth/google-sign-in`, { token : id_token })
+    $.ajax({
+        url : `http://localhost:4000/auth/google-sign-in`,
+        method : 'POST',
+        data : { token : id_token }
+    })
+    .done(function(response) {
+        console.log('============================', response)
+        console.log(response, 'iiii')
+        localStorage.setItem('token', response.token)
+    })
+
+    .fail(function(jqXHR, textSatus) {
+        console.log('request failaaaaaaed', textSatus)
+    })
+  }
+
+
+
+// function signOut() {
+//     var auth2 = gapi.auth2.getAuthInstance();
+//     auth2.signOut().then(function () {
+//       console.log('User signed out.');
+//     });
+//   }
+
+
+  
 
 $(document).ready(function () {
     fetchHomepage()
+
+    // if  (!localStorage.getItem('token')) {
+    //     $('#create-form').hide()
+    //     $('#google-sign-out').hide()
+    //     $('#google-sign-in').show()
+    //     fetchHomepage()
+
+    // } else {
+    //     $('#google-sign-out').show()
+    //     $('#create-form').show()
+    //     $('#google-sign-in').hide()
+    //     fetchHomepage()
+
+    // }
+
+    // fetchLanding()
+    // fetchLogin()
 
     $('#my-repositories').on('click', function () {
         fetchMyRepos()
@@ -216,13 +269,15 @@ $(document).ready(function () {
         fetchStarred()
     })
 
+     $('#submit-new-repo').on('click', function() {
+     createRepo()
+     })
 
     $('#search').on('click', function()  {
         search()
     })
 
     $('#check-other-repo').on('click', function()  {
-        console.log("masuk sini ===")
         searchFriendRepo()
     })
 })
